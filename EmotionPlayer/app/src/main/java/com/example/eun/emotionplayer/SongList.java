@@ -2,6 +2,7 @@ package com.example.eun.emotionplayer;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Typeface;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,6 +16,10 @@ public class SongList extends AppCompatActivity {
 
     private ListView listView;
     public static ArrayList<MusicDto> list;
+    public static Typeface CustomFont;
+    public static Typeface customFont;
+
+    // MusicDto는 mp3파일 정보를 가진 class
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +39,7 @@ public class SongList extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        customFont = Typeface.createFromAsset(getAssets(), "NanumPen.ttf");
     }
 
     public void getMusicList(){
@@ -46,7 +52,10 @@ public class SongList extends AppCompatActivity {
         };
 
         Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                projection, null, null, null);
+                projection, null, null, null); // Cursor = DB객체
+
+        // ContentResorlver 조사하기
+
 
         while(cursor.moveToNext()){
             MusicDto musicDto = new MusicDto();

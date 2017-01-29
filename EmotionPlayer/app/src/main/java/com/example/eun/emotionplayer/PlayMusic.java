@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -18,6 +19,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class PlayMusic extends AppCompatActivity implements View.OnClickListener{
 
@@ -30,7 +32,7 @@ public class PlayMusic extends AppCompatActivity implements View.OnClickListener
     private ContentResolver res;
     private ProgressUpdate progressUpdate;
     private int position;
-
+    private TextView current_time, total_time;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +53,9 @@ public class PlayMusic extends AppCompatActivity implements View.OnClickListener
         pause = (ImageView)findViewById(R.id.pause);
         next = (ImageView)findViewById(R.id.next);
 
+        current_time = (TextView) findViewById(R.id.current_time);
+        total_time = (TextView) findViewById(R.id.total_time);
+
         previous.setOnClickListener(this);
         play.setOnClickListener(this);
         pause.setOnClickListener(this);
@@ -60,10 +65,41 @@ public class PlayMusic extends AppCompatActivity implements View.OnClickListener
         progressUpdate = new ProgressUpdate();
         progressUpdate.start();
 
+
+        int total = mediaPlayer.getDuration();
+        int min = total / 1000 / 60;
+        int sec = (total / 1000) % 60;
+        String timeStr = "";
+
+        if(min < 10)
+            timeStr += "0";
+
+        timeStr += (min + ":");
+        if(sec < 10)
+            timeStr += "0";
+        timeStr += sec;
+
+        total_time.setText(timeStr);
+        total_time.setTypeface(Typeface.createFromAsset(getAssets(), "NanumPen.ttf"));
+
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                int time = mediaPlayer.getCurrentPosition();
+                int min = time / 1000 / 60;
+                int sec = (time / 1000) % 60;
+                String currentStr = "";
 
+                if (min < 10)
+                    currentStr += "0";
+
+                currentStr += (min + ":");
+                if (sec < 10)
+                    currentStr += "0";
+                currentStr += sec;
+
+                current_time.setText(currentStr);
+                current_time.setTypeface(Typeface.createFromAsset(getAssets(), "NanumPen.ttf"));
             }
 
             @Override
@@ -74,7 +110,22 @@ public class PlayMusic extends AppCompatActivity implements View.OnClickListener
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 mediaPlayer.seekTo(seekBar.getProgress());
-                if(seekBar.getProgress()>0 && play.getVisibility()==View.GONE){
+                int time = mediaPlayer.getCurrentPosition();
+                int min = time / 1000 / 60;
+                int sec = (time / 1000) % 60;
+                String currentStr = "";
+
+                if (min < 10)
+                    currentStr += "0";
+
+                currentStr += (min + ":");
+                if (sec < 10)
+                    currentStr += "0";
+                currentStr += sec;
+
+                current_time.setText(currentStr);
+                current_time.setTypeface(Typeface.createFromAsset(getAssets(), "NanumPen.ttf"));
+                if (seekBar.getProgress() > 0 && play.getVisibility() == View.GONE) {
                     mediaPlayer.start();
                 }
             }
@@ -83,17 +134,18 @@ public class PlayMusic extends AppCompatActivity implements View.OnClickListener
         mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                if(position+1<list.size()) {
+                if (position + 1 < list.size()) {
                     position++;
                     playMusic(list.get(position));
                 }
             }
         });
+        title.setTypeface(Typeface.createFromAsset(getAssets(), "NanumPen.ttf"));
     }
 
     // implements된 method ovveride
     @Override
-    public void onClick(View v) {
+    public void onClick(View v) { // 버튼 클릭시 action
         switch (v.getId()){
             case R.id.play:
                 pause.setVisibility(View.VISIBLE);
@@ -148,6 +200,7 @@ public class PlayMusic extends AppCompatActivity implements View.OnClickListener
         try {
             seekBar.setProgress(0);
             title.setText(musicDto.getArtist()+" - "+musicDto.getTitle());
+            title.setSelected(true);
             Uri musicURI = Uri.withAppendedPath(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, ""+musicDto.getId());
             mediaPlayer.reset();

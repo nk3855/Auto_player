@@ -3,8 +3,10 @@ package com.example.eun.emotionplayer;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.view.LayoutInflater;
@@ -27,6 +29,7 @@ public class MyAdapter extends BaseAdapter { // BaseAdapter를 상속받을 때 
     public MyAdapter(Activity activity, List<MusicDto> list) {
         this.list = list;
         this.activity = activity;
+        // 리스트뷰 객체화
         inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
@@ -47,8 +50,8 @@ public class MyAdapter extends BaseAdapter { // BaseAdapter를 상속받을 때 
     }
 
     @Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
-        if (convertView == null) { // ? 어떨 때 적용되는지
+    public View getView(final int position, View convertView, ViewGroup parent) { // 이미지 크기 조정
+        if (convertView == null) { // view가 최초로 호출될 때에만 convertView가 null 값
             convertView = inflater.inflate(R.layout.listview_item, parent, false);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             convertView.setLayoutParams(layoutParams);
@@ -60,10 +63,13 @@ public class MyAdapter extends BaseAdapter { // BaseAdapter를 상속받을 때 
 
         TextView title = (TextView) convertView.findViewById(R.id.title);
         title.setText(list.get(position).getTitle());
+        title.setSelected(true);
 
         TextView artist = (TextView) convertView.findViewById(R.id.artist);
         artist.setText(list.get(position).getArtist());
 
+        title.setTypeface(SongList.customFont);
+        artist.setTypeface(SongList.customFont);
         return convertView;
     }
 
@@ -93,7 +99,7 @@ public class MyAdapter extends BaseAdapter { // BaseAdapter를 상속받을 때 
                     scale = (int) Math.pow(2, (int) Math.round(Math.log(MAX_IMAGE_SIZE / (double) Math.max(options.outHeight, options.outWidth)) / Math.log(0.5)));
                 }
                 options.inJustDecodeBounds = false;
-                options.inSampleSize = scale;
+                options.inSampleSize = scale; // 이미지 파일 줄이기(background보다 큰 이미지를 넣게 되면 out of memory발생)
 
 
 
@@ -121,4 +127,6 @@ public class MyAdapter extends BaseAdapter { // BaseAdapter를 상속받을 때 
         }
         return null; // 파일이 존재하면 이미지파일(bitmap) return, 파일이 없거나 에러가 발생하면 null return
     }
+
+
 }
